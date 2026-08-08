@@ -1,24 +1,34 @@
+
 import os
+import streamlit as st
 from dotenv import load_dotenv
 from groq import Groq
 
-
+# Load variables from .env when running locally
 load_dotenv()
 
+# Get API key from environment
 api_key = os.getenv("GROQ_API_KEY")
 
+# If not found, get it from Streamlit Secrets
+if not api_key:
+    try:
+        api_key = st.secrets.get("GROQ_API_KEY")
+    except Exception:
+        api_key = None
+
+# Check if API key exists
 if not api_key:
     raise ValueError(
-        "GROQ_API_KEY not found in .env file"
+        "GROQ_API_KEY is not configured. "
+        "Add it to your .env file locally or Streamlit Cloud Secrets."
     )
 
-client = Groq(
-    api_key=api_key
-)
+# Create Groq client
+client = Groq(api_key=api_key)
 
 
 def ask_llm(prompt):
-
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
@@ -35,7 +45,6 @@ def ask_llm(prompt):
 
 
 def generate_chart_instruction(columns, question):
-
     prompt = f"""
 You are a data analyst.
 
@@ -74,6 +83,5 @@ If no chart is needed, return:
 }}
 """
 
-    response = ask_llm(prompt)
+    return ask_llm(prompt)
 
-    return response
