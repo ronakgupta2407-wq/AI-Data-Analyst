@@ -44,3 +44,25 @@ def ask_llm(prompt):
     )
 
     return response.choices[0].message.content
+
+
+def generate_chart_instruction(data):
+    prompt = f"""
+You are a data visualization expert.
+
+Analyze the following dataset:
+
+{data}
+
+Determine the most appropriate chart for this data.
+
+Return:
+1. Chart type
+2. X-axis column
+3. Y-axis column
+4. A short explanation of why this chart is appropriate
+
+Keep the response concise.
+"""
+
+    return ask_llm(prompt)
