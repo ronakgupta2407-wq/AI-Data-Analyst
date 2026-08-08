@@ -1,10 +1,10 @@
+
 import json
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 from pypdf import PdfReader
-from textwrap import dedent
 
 from utils import ask_llm, generate_chart_instruction
 
@@ -22,129 +22,15 @@ st.set_page_config(
 
 
 # ============================================================
-# CUSTOM CSS
+# HEADER
 # ============================================================
 
-st.markdown(
-    """
-    <style>
+st.title("📊 DataMind AI")
 
-    /* Main background */
-    .stApp {
-        background: #f8fafc;
-    }
-
-    /* Main content */
-    .main .block-container {
-        padding-top: 2rem;
-        padding-bottom: 3rem;
-        max-width: 1400px;
-    }
-
-    /* Hero */
-    .hero {
-        padding: 2.5rem;
-        border-radius: 24px;
-        background: linear-gradient(
-            135deg,
-            #111827 0%,
-            #1e293b 50%,
-            #334155 100%
-        );
-        color: white;
-        margin-bottom: 2rem;
-        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15);
-    }
-
-    .hero h1 {
-        font-size: 3rem;
-        margin-bottom: 0.5rem;
-        font-weight: 800;
-    }
-
-    .hero p {
-        font-size: 1.1rem;
-        color: #cbd5e1;
-        margin-bottom: 0;
-    }
-
-    /* Section headings */
-    .section-title {
-        font-size: 1.45rem;
-        font-weight: 750;
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
-        color: #111827;
-    }
-
-    /* Metric cards */
-    .metric-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 1.25rem;
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-        min-height: 120px;
-    }
-
-    .metric-label {
-        color: #64748b;
-        font-size: 0.9rem;
-        margin-bottom: 0.4rem;
-    }
-
-    .metric-value {
-        color: #0f172a;
-        font-size: 1.8rem;
-        font-weight: 750;
-    }
-
-    /* Upload box */
-    [data-testid="stFileUploader"] {
-        background: white;
-        border-radius: 18px;
-        padding: 1rem;
-        border: 1px solid #e2e8f0;
-    }
-
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: #ffffff;
-    }
-
-    /* Chat */
-    [data-testid="stChatMessage"] {
-        border-radius: 14px;
-    }
-
-    /* Buttons */
-    .stButton > button {
-        border-radius: 10px;
-    }
-
-    </style>
-    """,
-    unsafe_allow_html=True,
+st.write(
+    "Upload your data, ask questions in plain English, "
+    "discover insights and generate interactive visualizations."
 )
-
-
-# ============================================================
-# HERO HEADER
-# ============================================================
-
-hero_html = dedent(
-    """
-    <div class="hero">
-        <h1>📊 DataMind AI</h1>
-        <p>
-            Upload your data, ask questions in plain English,
-            discover insights and generate interactive visualizations.
-        </p>
-    </div>
-    """
-)
-
-st.markdown(hero_html, unsafe_allow_html=True)
 
 
 # ============================================================
@@ -153,7 +39,7 @@ st.markdown(hero_html, unsafe_allow_html=True)
 
 with st.sidebar:
 
-    st.markdown("## 📊 DataMind AI")
+    st.title("📊 DataMind AI")
 
     st.caption(
         "Your AI-powered data analysis assistant."
@@ -161,37 +47,23 @@ with st.sidebar:
 
     st.divider()
 
-    st.markdown("### 📂 Supported Files")
+    st.subheader("📂 Supported Files")
 
-    st.markdown(
-        """
-        📄 **CSV**
-
-        📊 **Excel**
-
-        📕 **PDF**
-        """
-    )
+    st.write("📄 CSV")
+    st.write("📊 Excel")
+    st.write("📕 PDF")
 
     st.divider()
 
-    st.markdown("### 💡 Try asking")
+    st.subheader("💡 Try asking")
 
     st.caption("Dataset questions")
 
-    st.markdown(
-        """
-        • Who has the highest value?
-
-        • What is the average?
-
-        • Find the top 5 records.
-
-        • Which category performs best?
-
-        • Show a bar chart.
-        """
-    )
+    st.write("• Who has the highest value?")
+    st.write("• What is the average?")
+    st.write("• Find the top 5 records.")
+    st.write("• Which category performs best?")
+    st.write("• Show a bar chart.")
 
     st.divider()
 
@@ -202,10 +74,7 @@ with st.sidebar:
 # UPLOAD SECTION
 # ============================================================
 
-st.markdown(
-    '<div class="section-title">📂 Upload your dataset</div>',
-    unsafe_allow_html=True,
-)
+st.header("📂 Upload your dataset")
 
 st.write(
     "Upload a CSV, Excel spreadsheet, or PDF document to begin."
@@ -214,7 +83,6 @@ st.write(
 uploaded_file = st.file_uploader(
     "Choose a file",
     type=["csv", "xlsx", "pdf"],
-    label_visibility="collapsed",
 )
 
 
@@ -223,25 +91,6 @@ uploaded_file = st.file_uploader(
 # ============================================================
 
 if uploaded_file is None:
-
-    st.markdown(
-        """
-        <h2 style="text-align:center;">
-            📁 Upload a dataset to get started
-        </h2>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        """
-        <p style="text-align:center; color:#6b7280;">
-            Ask questions, discover insights and generate
-            interactive visualizations using AI.
-        </p>
-        """,
-        unsafe_allow_html=True,
-    )
 
     st.info(
         "📂 Upload a CSV, Excel spreadsheet, or PDF document above to begin."
@@ -316,10 +165,7 @@ if file_type == "data":
     # DATASET OVERVIEW
     # --------------------------------------------------------
 
-    st.markdown(
-        '<div class="section-title">📈 Dataset Overview</div>',
-        unsafe_allow_html=True,
-    )
+    st.header("📈 Dataset Overview")
 
     rows = df.shape[0]
     columns = df.shape[1]
@@ -327,78 +173,36 @@ if file_type == "data":
 
     col1, col2, col3, col4 = st.columns(4)
 
-    # --------------------------------------------------------
-    # ROWS
-    # --------------------------------------------------------
-
     with col1:
-
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-label">Total Rows</div>
-                <div class="metric-value">{rows:,}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            "Total Rows",
+            f"{rows:,}",
         )
-
-    # --------------------------------------------------------
-    # COLUMNS
-    # --------------------------------------------------------
 
     with col2:
-
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-label">Total Columns</div>
-                <div class="metric-value">{columns:,}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            "Total Columns",
+            f"{columns:,}",
         )
-
-    # --------------------------------------------------------
-    # MISSING VALUES
-    # --------------------------------------------------------
 
     with col3:
-
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-label">Missing Values</div>
-                <div class="metric-value">{missing:,}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            "Missing Values",
+            f"{missing:,}",
         )
-
-    # --------------------------------------------------------
-    # FILE TYPE
-    # --------------------------------------------------------
 
     with col4:
-
-        st.markdown(
-            """
-            <div class="metric-card">
-                <div class="metric-label">File Type</div>
-                <div class="metric-value">Data</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            "File Type",
+            "Data",
         )
+
 
     # --------------------------------------------------------
     # DATASET PREVIEW
     # --------------------------------------------------------
 
-    st.markdown(
-        '<div class="section-title">📋 Dataset Preview</div>',
-        unsafe_allow_html=True,
-    )
+    st.header("📋 Dataset Preview")
 
     tab1, tab2 = st.tabs(
         ["📋 Data", "🔎 Column Information"]
@@ -417,10 +221,12 @@ if file_type == "data":
         info_df = pd.DataFrame(
             {
                 "Column": df.columns,
+
                 "Data Type": [
                     str(dtype)
                     for dtype in df.dtypes
                 ],
+
                 "Missing Values": [
                     int(df[column].isnull().sum())
                     for column in df.columns
@@ -434,14 +240,12 @@ if file_type == "data":
             hide_index=True,
         )
 
+
     # --------------------------------------------------------
     # AI ANALYST
     # --------------------------------------------------------
 
-    st.markdown(
-        '<div class="section-title">🤖 Ask your AI Analyst</div>',
-        unsafe_allow_html=True,
-    )
+    st.header("🤖 Ask your AI Analyst")
 
     st.caption(
         "Ask questions about your dataset in plain English."
@@ -512,6 +316,7 @@ Rules:
                         f"Unable to get AI response: {str(e)}"
                     )
 
+
                 # ------------------------------------------------
                 # CHART GENERATION
                 # ------------------------------------------------
@@ -523,7 +328,6 @@ Rules:
                         question,
                     )
 
-                    # Remove accidental markdown fences
                     chart_response = (
                         chart_response
                         .replace("```json", "")
@@ -549,9 +353,7 @@ Rules:
                         and y in df.columns
                     ):
 
-                        st.markdown(
-                            "### 📊 Visualization"
-                        )
+                        st.subheader("📊 Visualization")
 
                         if chart_type == "bar":
 
@@ -595,22 +397,13 @@ Rules:
 
                         if fig:
 
-                            fig.update_layout(
-                                template="plotly_white",
-                                margin=dict(
-                                    l=20,
-                                    r=20,
-                                    t=60,
-                                    b=20,
-                                ),
-                            )
-
                             st.plotly_chart(
                                 fig,
                                 use_container_width=True,
                             )
 
                 except Exception:
+
                     # Chart generation should never
                     # prevent the AI answer from showing.
                     pass
@@ -622,10 +415,7 @@ Rules:
 
 elif file_type == "pdf":
 
-    st.markdown(
-        '<div class="section-title">📕 PDF Document</div>',
-        unsafe_allow_html=True,
-    )
+    st.header("📕 PDF Document")
 
     if not pdf_text.strip():
 
@@ -634,6 +424,7 @@ elif file_type == "pdf":
         )
 
         st.stop()
+
 
     # --------------------------------------------------------
     # PDF STATISTICS
@@ -649,62 +440,33 @@ elif file_type == "pdf":
 
     col1, col2, col3 = st.columns(3)
 
-    # --------------------------------------------------------
-    # WORDS
-    # --------------------------------------------------------
-
     with col1:
 
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-label">Words</div>
-                <div class="metric-value">{word_count:,}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            "Words",
+            f"{word_count:,}",
         )
-
-    # --------------------------------------------------------
-    # CHARACTERS
-    # --------------------------------------------------------
 
     with col2:
 
-        st.markdown(
-            f"""
-            <div class="metric-card">
-                <div class="metric-label">Characters</div>
-                <div class="metric-value">{character_count:,}</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            "Characters",
+            f"{character_count:,}",
         )
-
-    # --------------------------------------------------------
-    # FILE TYPE
-    # --------------------------------------------------------
 
     with col3:
 
-        st.markdown(
-            """
-            <div class="metric-card">
-                <div class="metric-label">File Type</div>
-                <div class="metric-value">PDF</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
+        st.metric(
+            "File Type",
+            "PDF",
         )
+
 
     # --------------------------------------------------------
     # PDF PREVIEW
     # --------------------------------------------------------
 
-    st.markdown(
-        '<div class="section-title">📄 Document Preview</div>',
-        unsafe_allow_html=True,
-    )
+    st.header("📄 Document Preview")
 
     with st.expander(
         "👀 View extracted text"
@@ -717,14 +479,12 @@ elif file_type == "pdf":
             label_visibility="collapsed",
         )
 
+
     # --------------------------------------------------------
     # PDF AI
     # --------------------------------------------------------
 
-    st.markdown(
-        '<div class="section-title">🤖 Ask about this PDF</div>',
-        unsafe_allow_html=True,
-    )
+    st.header("🤖 Ask about this PDF")
 
     st.caption(
         "Ask questions about the uploaded document."
@@ -786,3 +546,4 @@ Rules:
                     st.error(
                         f"Unable to get AI response: {str(e)}"
                     )
+
