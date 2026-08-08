@@ -1,11 +1,12 @@
-import streamlit as st
-import pandas as pd
-import plotly.express as px
 import json
 
+import pandas as pd
+import plotly.express as px
+import streamlit as st
 from pypdf import PdfReader
-from utils import ask_llm, generate_chart_instruction
 from textwrap import dedent
+
+from utils import ask_llm, generate_chart_instruction
 
 
 # ============================================================
@@ -16,7 +17,7 @@ st.set_page_config(
     page_title="DataMind AI",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 
@@ -26,38 +27,104 @@ st.set_page_config(
 
 st.markdown(
     """
-<style>
+    <style>
 
-.info-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 15px;
-    padding: 25px;
-    text-align: center;
-}
+    /* Main background */
+    .stApp {
+        background: #f8fafc;
+    }
 
-.card-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #64748b;
-}
+    /* Main content */
+    .main .block-container {
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+        max-width: 1400px;
+    }
 
-.card-value {
-    font-size: 30px;
-    font-weight: 700;
-    color: #111827;
-}
+    /* Hero */
+    .hero {
+        padding: 2.5rem;
+        border-radius: 24px;
+        background: linear-gradient(
+            135deg,
+            #111827 0%,
+            #1e293b 50%,
+            #334155 100%
+        );
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(15, 23, 42, 0.15);
+    }
 
-.section-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin-top: 25px;
-    margin-bottom: 15px;
-}
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+        font-weight: 800;
+    }
 
-</style>
-""",
-    unsafe_allow_html=True
+    .hero p {
+        font-size: 1.1rem;
+        color: #cbd5e1;
+        margin-bottom: 0;
+    }
+
+    /* Section headings */
+    .section-title {
+        font-size: 1.45rem;
+        font-weight: 750;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        color: #111827;
+    }
+
+    /* Metric cards */
+    .metric-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.25rem;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        min-height: 120px;
+    }
+
+    .metric-label {
+        color: #64748b;
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .metric-value {
+        color: #0f172a;
+        font-size: 1.8rem;
+        font-weight: 750;
+    }
+
+    /* Upload box */
+    [data-testid="stFileUploader"] {
+        background: white;
+        border-radius: 18px;
+        padding: 1rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background: #ffffff;
+    }
+
+    /* Chat */
+    [data-testid="stChatMessage"] {
+        border-radius: 14px;
+    }
+
+    /* Buttons */
+    .stButton > button {
+        border-radius: 10px;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
 
@@ -67,15 +134,17 @@ st.markdown(
 
 hero_html = dedent(
     """
-<h1>📊 DataMind AI</h1>
-<p>Upload your dataset or PDF and ask questions using AI.</p>
-"""
+    <div class="hero">
+        <h1>📊 DataMind AI</h1>
+        <p>
+            Upload your data, ask questions in plain English,
+            discover insights and generate interactive visualizations.
+        </p>
+    </div>
+    """
 )
 
-st.markdown(
-    hero_html,
-    unsafe_allow_html=True
-)
+st.markdown(hero_html, unsafe_allow_html=True)
 
 
 # ============================================================
@@ -84,11 +153,10 @@ st.markdown(
 
 with st.sidebar:
 
-    st.markdown(
-        """
-<h2>📊 DataMind AI</h2>
-""",
-        unsafe_allow_html=True
+    st.markdown("## 📊 DataMind AI")
+
+    st.caption(
+        "Your AI-powered data analysis assistant."
     )
 
     st.divider()
@@ -97,12 +165,12 @@ with st.sidebar:
 
     st.markdown(
         """
-📄 **CSV**
+        📄 **CSV**
 
-📊 **Excel**
+        📊 **Excel**
 
-📕 **PDF**
-"""
+        📕 **PDF**
+        """
     )
 
     st.divider()
@@ -113,16 +181,16 @@ with st.sidebar:
 
     st.markdown(
         """
-• Who has the highest value?
+        • Who has the highest value?
 
-• What is the average?
+        • What is the average?
 
-• Find the top 5 records.
+        • Find the top 5 records.
 
-• Which category performs best?
+        • Which category performs best?
 
-• Show a bar chart.
-"""
+        • Show a bar chart.
+        """
     )
 
     st.divider()
@@ -135,8 +203,8 @@ with st.sidebar:
 # ============================================================
 
 st.markdown(
-    "📂 Upload your dataset",
-    unsafe_allow_html=True
+    '<div class="section-title">📂 Upload your dataset</div>',
+    unsafe_allow_html=True,
 )
 
 st.write(
@@ -146,7 +214,7 @@ st.write(
 uploaded_file = st.file_uploader(
     "Choose a file",
     type=["csv", "xlsx", "pdf"],
-    label_visibility="collapsed"
+    label_visibility="collapsed",
 )
 
 
@@ -157,16 +225,22 @@ uploaded_file = st.file_uploader(
 if uploaded_file is None:
 
     st.markdown(
-        "<h2 style='text-align:center;'>📁 Upload a dataset to get started</h2>",
-        unsafe_allow_html=True
+        """
+        <h2 style="text-align:center;">
+            📁 Upload a dataset to get started
+        </h2>
+        """,
+        unsafe_allow_html=True,
     )
 
     st.markdown(
-        "<p style='text-align:center; color:#6b7280;'>"
-        "Ask questions, discover insights and generate "
-        "interactive visualizations using AI."
-        "</p>",
-        unsafe_allow_html=True
+        """
+        <p style="text-align:center; color:#6b7280;">
+            Ask questions, discover insights and generate
+            interactive visualizations using AI.
+        </p>
+        """,
+        unsafe_allow_html=True,
     )
 
     st.info(
@@ -182,30 +256,45 @@ if uploaded_file is None:
 
 file_name = uploaded_file.name.lower()
 
-if file_name.endswith(".csv"):
+try:
 
-    df = pd.read_csv(uploaded_file)
-    file_type = "data"
+    if file_name.endswith(".csv"):
 
-elif file_name.endswith(".xlsx"):
+        df = pd.read_csv(uploaded_file)
+        file_type = "data"
 
-    df = pd.read_excel(uploaded_file)
-    file_type = "data"
+    elif file_name.endswith(".xlsx"):
 
-elif file_name.endswith(".pdf"):
+        df = pd.read_excel(uploaded_file)
+        file_type = "data"
 
-    reader = PdfReader(uploaded_file)
+    elif file_name.endswith(".pdf"):
 
-    pdf_text = ""
+        reader = PdfReader(uploaded_file)
 
-    for page in reader.pages:
+        pdf_text = ""
 
-        text = page.extract_text()
+        for page in reader.pages:
 
-        if text:
-            pdf_text += text + "\n"
+            text = page.extract_text()
 
-    file_type = "pdf"
+            if text:
+                pdf_text += text + "\n"
+
+        file_type = "pdf"
+
+    else:
+
+        st.error("Unsupported file type.")
+        st.stop()
+
+except Exception as e:
+
+    st.error(
+        f"Unable to read the uploaded file: {str(e)}"
+    )
+
+    st.stop()
 
 
 # ============================================================
@@ -229,7 +318,7 @@ if file_type == "data":
 
     st.markdown(
         '<div class="section-title">📈 Dataset Overview</div>',
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     rows = df.shape[0]
@@ -246,12 +335,12 @@ if file_type == "data":
 
         st.markdown(
             f"""
-<div class="info-card">
-<div class="card-title">Rows</div>
-<div class="card-value">{rows:,}</div>
-</div>
-""",
-            unsafe_allow_html=True
+            <div class="metric-card">
+                <div class="metric-label">Total Rows</div>
+                <div class="metric-value">{rows:,}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
     # --------------------------------------------------------
@@ -262,12 +351,12 @@ if file_type == "data":
 
         st.markdown(
             f"""
-<div class="info-card">
-<div class="card-title">Columns</div>
-<div class="card-value">{columns}</div>
-</div>
-""",
-            unsafe_allow_html=True
+            <div class="metric-card">
+                <div class="metric-label">Total Columns</div>
+                <div class="metric-value">{columns:,}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
     # --------------------------------------------------------
@@ -278,12 +367,12 @@ if file_type == "data":
 
         st.markdown(
             f"""
-<div class="info-card">
-<div class="card-title">Missing Values</div>
-<div class="card-value">{missing:,}</div>
-</div>
-""",
-            unsafe_allow_html=True
+            <div class="metric-card">
+                <div class="metric-label">Missing Values</div>
+                <div class="metric-value">{missing:,}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
 
     # --------------------------------------------------------
@@ -294,14 +383,13 @@ if file_type == "data":
 
         st.markdown(
             """
-<div class="info-card">
-<div class="card-title">File Type</div>
-<div class="card-value">DATA</div>
-</div>
-""",
-            unsafe_allow_html=True
+            <div class="metric-card">
+                <div class="metric-label">File Type</div>
+                <div class="metric-value">Data</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
-
 
     # --------------------------------------------------------
     # DATASET PREVIEW
@@ -309,7 +397,7 @@ if file_type == "data":
 
     st.markdown(
         '<div class="section-title">📋 Dataset Preview</div>',
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     tab1, tab2 = st.tabs(
@@ -321,7 +409,7 @@ if file_type == "data":
         st.dataframe(
             df,
             use_container_width=True,
-            height=400
+            height=400,
         )
 
     with tab2:
@@ -329,25 +417,22 @@ if file_type == "data":
         info_df = pd.DataFrame(
             {
                 "Column": df.columns,
-
                 "Data Type": [
                     str(dtype)
                     for dtype in df.dtypes
                 ],
-
                 "Missing Values": [
                     int(df[column].isnull().sum())
                     for column in df.columns
-                ]
+                ],
             }
         )
 
         st.dataframe(
             info_df,
             use_container_width=True,
-            hide_index=True
+            hide_index=True,
         )
-
 
     # --------------------------------------------------------
     # AI ANALYST
@@ -355,7 +440,7 @@ if file_type == "data":
 
     st.markdown(
         '<div class="section-title">🤖 Ask your AI Analyst</div>',
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     st.caption(
@@ -370,14 +455,14 @@ if file_type == "data":
 
         with st.chat_message(
             "user",
-            avatar="👤"
+            avatar="👤",
         ):
 
             st.write(question)
 
         with st.chat_message(
             "assistant",
-            avatar="🤖"
+            avatar="🤖",
         ):
 
             with st.spinner(
@@ -415,21 +500,36 @@ Rules:
 - Keep the answer concise.
 """
 
-                answer = ask_llm(prompt)
+                try:
 
-                st.write(answer)
+                    answer = ask_llm(prompt)
 
+                    st.write(answer)
+
+                except Exception as e:
+
+                    st.error(
+                        f"Unable to get AI response: {str(e)}"
+                    )
 
                 # ------------------------------------------------
                 # CHART GENERATION
                 # ------------------------------------------------
 
-                chart_response = generate_chart_instruction(
-                    list(df.columns),
-                    question
-                )
-
                 try:
+
+                    chart_response = generate_chart_instruction(
+                        list(df.columns),
+                        question,
+                    )
+
+                    # Remove accidental markdown fences
+                    chart_response = (
+                        chart_response
+                        .replace("```json", "")
+                        .replace("```", "")
+                        .strip()
+                    )
 
                     chart_data = json.loads(
                         chart_response
@@ -437,72 +537,82 @@ Rules:
 
                     chart_type = chart_data.get(
                         "chart",
-                        "none"
+                        "none",
                     )
 
-                    if chart_type != "none":
+                    x = chart_data.get("x")
+                    y = chart_data.get("y")
 
-                        x = chart_data.get("x")
-                        y = chart_data.get("y")
+                    if (
+                        chart_type != "none"
+                        and x in df.columns
+                        and y in df.columns
+                    ):
 
-                        if (
-                            x in df.columns
-                            and y in df.columns
-                        ):
+                        st.markdown(
+                            "### 📊 Visualization"
+                        )
 
-                            st.markdown(
-                                "### 📊 Visualization"
+                        if chart_type == "bar":
+
+                            fig = px.bar(
+                                df,
+                                x=x,
+                                y=y,
+                                title=f"{y} by {x}",
                             )
 
-                            if chart_type == "bar":
+                        elif chart_type == "line":
 
-                                fig = px.bar(
-                                    df,
-                                    x=x,
-                                    y=y,
-                                    title=f"{y} by {x}"
-                                )
+                            fig = px.line(
+                                df,
+                                x=x,
+                                y=y,
+                                title=f"{y} by {x}",
+                            )
 
-                            elif chart_type == "line":
+                        elif chart_type == "pie":
 
-                                fig = px.line(
-                                    df,
-                                    x=x,
-                                    y=y,
-                                    title=f"{y} by {x}"
-                                )
+                            fig = px.pie(
+                                df,
+                                names=x,
+                                values=y,
+                                title=f"{y} by {x}",
+                            )
 
-                            elif chart_type == "pie":
+                        elif chart_type == "scatter":
 
-                                fig = px.pie(
-                                    df,
-                                    names=x,
-                                    values=y,
-                                    title=f"{y} by {x}"
-                                )
+                            fig = px.scatter(
+                                df,
+                                x=x,
+                                y=y,
+                                title=f"{y} vs {x}",
+                            )
 
-                            elif chart_type == "scatter":
+                        else:
 
-                                fig = px.scatter(
-                                    df,
-                                    x=x,
-                                    y=y,
-                                    title=f"{y} vs {x}"
-                                )
+                            fig = None
 
-                            else:
+                        if fig:
 
-                                fig = None
+                            fig.update_layout(
+                                template="plotly_white",
+                                margin=dict(
+                                    l=20,
+                                    r=20,
+                                    t=60,
+                                    b=20,
+                                ),
+                            )
 
-                            if fig:
-
-                                st.plotly_chart(
-                                    fig,
-                                    use_container_width=True
-                                )
+                            st.plotly_chart(
+                                fig,
+                                use_container_width=True,
+                            )
 
                 except Exception:
-
+                    # Chart generation should never
+                    # prevent the AI answer from showing.
                     pass
 
 
@@ -514,7 +624,7 @@ elif file_type == "pdf":
 
     st.markdown(
         '<div class="section-title">📕 PDF Document</div>',
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     if not pdf_text.strip():
@@ -524,7 +634,6 @@ elif file_type == "pdf":
         )
 
         st.stop()
-
 
     # --------------------------------------------------------
     # PDF STATISTICS
@@ -540,7 +649,6 @@ elif file_type == "pdf":
 
     col1, col2, col3 = st.columns(3)
 
-
     # --------------------------------------------------------
     # WORDS
     # --------------------------------------------------------
@@ -549,14 +657,13 @@ elif file_type == "pdf":
 
         st.markdown(
             f"""
-<div class="info-card">
-<div class="card-title">Words</div>
-<div class="card-value">{word_count:,}</div>
-</div>
-""",
-            unsafe_allow_html=True
+            <div class="metric-card">
+                <div class="metric-label">Words</div>
+                <div class="metric-value">{word_count:,}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
-
 
     # --------------------------------------------------------
     # CHARACTERS
@@ -566,14 +673,13 @@ elif file_type == "pdf":
 
         st.markdown(
             f"""
-<div class="info-card">
-<div class="card-title">Characters</div>
-<div class="card-value">{character_count:,}</div>
-</div>
-""",
-            unsafe_allow_html=True
+            <div class="metric-card">
+                <div class="metric-label">Characters</div>
+                <div class="metric-value">{character_count:,}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
-
 
     # --------------------------------------------------------
     # FILE TYPE
@@ -583,14 +689,13 @@ elif file_type == "pdf":
 
         st.markdown(
             """
-<div class="info-card">
-<div class="card-title">File Type</div>
-<div class="card-value">PDF</div>
-</div>
-""",
-            unsafe_allow_html=True
+            <div class="metric-card">
+                <div class="metric-label">File Type</div>
+                <div class="metric-value">PDF</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
         )
-
 
     # --------------------------------------------------------
     # PDF PREVIEW
@@ -598,7 +703,7 @@ elif file_type == "pdf":
 
     st.markdown(
         '<div class="section-title">📄 Document Preview</div>',
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     with st.expander(
@@ -609,9 +714,8 @@ elif file_type == "pdf":
             "PDF content",
             pdf_text[:15000],
             height=400,
-            label_visibility="collapsed"
+            label_visibility="collapsed",
         )
-
 
     # --------------------------------------------------------
     # PDF AI
@@ -619,7 +723,7 @@ elif file_type == "pdf":
 
     st.markdown(
         '<div class="section-title">🤖 Ask about this PDF</div>',
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     st.caption(
@@ -634,14 +738,14 @@ elif file_type == "pdf":
 
         with st.chat_message(
             "user",
-            avatar="👤"
+            avatar="👤",
         ):
 
             st.write(question)
 
         with st.chat_message(
             "assistant",
-            avatar="🤖"
+            avatar="🤖",
         ):
 
             with st.spinner(
@@ -671,6 +775,14 @@ Rules:
 - Keep the answer concise.
 """
 
-                answer = ask_llm(prompt)
+                try:
 
-                st.write(answer)
+                    answer = ask_llm(prompt)
+
+                    st.write(answer)
+
+                except Exception as e:
+
+                    st.error(
+                        f"Unable to get AI response: {str(e)}"
+                    )
